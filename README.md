@@ -10,7 +10,7 @@ This project is a Django REST API for importing and exposing EV charging locatio
 -Tests
 
 # Tech Stack
--Python
+-Python 3
 -Django
 -Django REST Framework
 -SQLite
@@ -23,11 +23,20 @@ Location Detail- GET /task/locations/<id>/
 -Returns a detailed view of a single location including EVSEs and connectors.
 
 # Running the Project
-Install dependencies- pip install -r requirements.txt
-Run migrations- python manage.py migrate
-Import data- python manage.py import_data
-Create admin user -python manage.py createsuperuser
-Start server- python manage.py runserver
+If on Ubuntu, first run: `sudo apt install python3-venv python3-pip`
+
+```bash
+git clone 
+cd electroverse-test-template
+python3 -m venv venv
+source venv/bin/activate  
+pip install -r requirements.txt
+python3 manage.py migrate
+python3 manage.py import_data
+python3 manage.py createsuperuser
+python3 manage.py runserver
+```
+
 Admin Interface- Accessible at: http://127.0.0.1:8000/admin/
 
 # The admin panel allows viewing and managing:
