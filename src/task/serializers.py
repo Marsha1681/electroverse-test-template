@@ -14,34 +14,41 @@ class EVSESerializer(serializers.ModelSerializer):
         fields = ["physical_identifier", "status", "connectors"]
 
 class LocationListSerializer(serializers.ModelSerializer):
-    number_of_evses = serializers.SerializerMethodField()
+    coordinates = serializers.SerializerMethodField()
+    number_of_evses = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Location
         fields = [
-            "id",
-            "latitude",
-            "longitude",
+            "coordinates",
             "operator_reference",
             "country_reference",
             "postal_code",
             "number_of_evses",
         ]
 
-    def get_number_of_evses(self, obj):
-        return obj.evses.count()
+    def get_coordinates(self, obj):
+        return {
+            "lat": obj.latitude,
+            "lon": obj.longitude,
+        }
 
 class LocationDetailSerializer(serializers.ModelSerializer):
-    evses = EVSESerializer(many=True)
+    coordinates = serializers.SerializerMethodField()
+    evses = EVSESerializer(many=True, read_only=True)
 
     class Meta:
         model = Location
         fields = [
-            "id",
-            "latitude",
-            "longitude",
+            "coordinates",
             "operator_reference",
             "country_reference",
             "postal_code",
             "evses",
         ]
+
+    def get_coordinates(self, obj):
+        return {
+            "lat": obj.latitude,
+            "lon": obj.longitude,
+        }
