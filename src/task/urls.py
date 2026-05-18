@@ -1,7 +1,8 @@
 from django.urls import path
-
-from src.task import views
+from .views import LocationListView, LocationDetailView
 
 urlpatterns = [
-    path("", views.index, name="index"),
+
+    path("locations/", LocationListView.as_view()),
+    path("locations/<int:pk>/", LocationDetailView.as_view()),
 ]

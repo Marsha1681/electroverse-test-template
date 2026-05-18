@@ -27,27 +27,55 @@ class Command(BaseCommand):
                 or coords.get("longitude")
             )
 
+            op = item.get("operator")
+
+            if isinstance(op, dict):
+                operator_reference = op.get("name") or op.get("id") or ""
+            else:
+                operator_reference = op or "UNKNOWN"
+
             location = Location.objects.create(
                 reference=item.get("reference"),
-                operator_reference=item.get("operator_reference", ""),
-                country_reference=item.get("country_reference", ""),
+                operator_reference=operator_reference,
+                country_reference=item.get("country", "") or "",
                 postal_code=item.get("postal_code", ""),
                 latitude=latitude,
                 longitude=longitude,
             )
 
+            seen_evses = set()
+
             for evse_data in item.get("evses", []):
-                evse = EVSE.objects.create(
+                key = evse_data["physical_reference"]
+
+                if key in seen_evses:
+                    continue
+
+                seen_evses.add(key)
+
+                evse, _ = EVSE.objects.get_or_create(
+                    physical_identifier=key,
                     location=location,
-                    physical_identifier=evse_data.get("physical_reference", ""),
-                    status=evse_data.get("status", ""),
+                    defaults={
+                        "status": evse_data.get("status", "UNKNOWN"),
+                    }
+                )
+
+            for evse_data in item.get("evses", []):
+                evse, _ = EVSE.objects.get_or_create(
+                    physical_identifier=evse_data["physical_reference"],
+                    location=location,
+                    defaults={
+                        "status": evse_data.get("status", "UNKNOWN"),
+                    }
                 )
 
                 for conn in evse_data.get("connectors", []):
-                    Connector.objects.create(
+                    Connector.objects.get_or_create(
                         evse=evse,
-                        power=conn.get("power", 0),
-                        standard=conn.get("standard", ""),
+                        power=conn.get("power") or conn.get("power_kw") or 0,
+                        standard=conn.get("standard") or "UNKNOWN",
                     )
 
         self.stdout.write(self.style.SUCCESS("Import complete"))
+        
